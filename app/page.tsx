@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Camera, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
 import { HeroMotion } from "@/components/hero-motion";
+import { PoweredBy } from "@/components/powered-by";
 import { SiteHeader } from "@/components/site-header";
 import { socialPosts } from "@/data/menu";
 import { getMenu } from "@/lib/content";
@@ -130,7 +131,11 @@ export default async function Home() {
       </main>
       <footer className="site-footer">
         <div className="footer-wordmark">BLA BLA</div>
-        <div><span>КАФЕ · МУАБЕТ · СТРУМИЦА</span><span>© 2026 BLA BLA CAFE</span></div>
+        <div>
+          <span>КАФЕ · МУАБЕТ · СТРУМИЦА</span>
+          <PoweredBy />
+          <span>© 2026 BLA BLA CAFE</span>
+        </div>
       </footer>
     </>
   );

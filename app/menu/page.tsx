@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, Camera } from "lucide-react";
 import { MenuBrowser } from "@/components/menu-browser";
+import { PoweredBy } from "@/components/powered-by";
 import { SiteHeader } from "@/components/site-header";
 import { getMenu } from "@/lib/content";
 
@@ -41,6 +42,7 @@ export default async function MenuPage() {
         <a href="https://www.instagram.com/blablacafe14/" target="_blank" rel="noreferrer">
           <Camera size={17} /> @blablacafe14
         </a>
+        <PoweredBy />
       </footer>
     </>
   );
