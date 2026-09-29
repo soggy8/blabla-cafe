@@ -198,8 +198,10 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .site-footer > div:last-child { display: flex; align-items: center; justify-content: space-between; margin-top: 55px; color: rgba(255,247,232,.45); font-size: .55rem; letter-spacing: .16em; }
 .powered-by { display: inline-flex; align-items: center; gap: 14px; color: rgba(255,247,232,.7); font-size: .78rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; transition: color .25s ease; }
 .powered-by:hover, .powered-by:focus-visible { color: var(--cream); }
-.estada-logo { display: block; width: 150px; height: auto; transition: transform .25s ease, filter .25s ease; }
-.powered-by:hover .estada-logo, .powered-by:focus-visible .estada-logo { transform: translateY(-2px); filter: brightness(1.25); }
+.estada-mark { display: flex; align-items: center; gap: 10px; transition: transform .25s ease, filter .25s ease; }
+.estada-icon { display: block; width: 30px; height: auto; }
+.estada-logo { display: block; width: 150px; height: auto; }
+.powered-by:hover .estada-mark, .powered-by:focus-visible .estada-mark { transform: translateY(-2px); filter: brightness(1.25); }
 
 .menu-page { min-height: 100vh; padding: 150px max(4vw, calc((100vw - 1240px)/2)) 100px; background: var(--paper); }
 .menu-page + .menu-footer, .menu-page ~ .menu-footer { background: var(--ink); color: var(--cream); }
