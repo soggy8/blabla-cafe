@@ -103,5 +103,5 @@ if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
   console.warn("ADMIN_EMAIL/ADMIN_PASSWORD missing; owner account was not created.");
 }
 
-console.log("Prototype content seeded.");
+console.log("Menu content seeded.");
 process.exit(0);

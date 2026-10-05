@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (!hasDatabase()) {
-    return Response.json({ ok: true, mode: "prototype" });
+    return Response.json({ ok: true, database: false });
   }
 
   try {

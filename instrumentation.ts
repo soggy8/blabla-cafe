@@ -41,7 +41,7 @@ export async function register() {
           sortOrder: index,
         });
       }
-      console.log("Prototype menu seeded.");
+      console.log("Menu seeded.");
     }
 
     if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {

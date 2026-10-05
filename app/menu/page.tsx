@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default async function MenuPage() {
-  const { categories, items, source } = await getMenu();
+  const { categories, items } = await getMenu();
 
   return (
     <>
@@ -30,11 +30,6 @@ export default async function MenuPage() {
           </p>
         </section>
         <MenuBrowser categories={categories} items={items} />
-        {source === "seed" ? (
-          <p className="prototype-note">
-            Прототип · менито моментално се вчитува од локални податоци
-          </p>
-        ) : null}
       </main>
       <footer className="menu-footer">
         <span>BLA BLA CAFE · СТРУМИЦА</span>

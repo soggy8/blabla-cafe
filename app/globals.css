@@ -230,8 +230,7 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .menu-row p { margin: 7px 0 0; color: #71695e; font-size: .78rem; }
 .menu-price { font-size: 1.15rem; }
 .menu-price small { font-size: .65rem; }
-.empty-state, .prototype-note { padding: 40px 0; color: #766f64; font-size: .72rem; }
-.prototype-note { text-align: center; text-transform: uppercase; letter-spacing: .12em; }
+.empty-state { padding: 40px 0; color: #766f64; font-size: .72rem; }
 .menu-footer { display: flex; align-items: center; justify-content: space-between; padding: 24px 4vw; font-size: .6rem; font-weight: 700; letter-spacing: .12em; }
 .menu-footer a { display: flex; align-items: center; gap: 7px; }
 

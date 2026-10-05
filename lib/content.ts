@@ -48,7 +48,7 @@ export async function getMenu(): Promise<{
       })),
     };
   } catch (error) {
-    console.error("Database menu lookup failed; using prototype seed.", error);
+    console.error("Database menu lookup failed; using bundled menu.", error);
     return { categories: seedCategories, items: seedItems, source: "seed" };
   }
 }
