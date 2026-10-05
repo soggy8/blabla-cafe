@@ -211,10 +211,21 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .menu-note { margin: 0; color: #686055; line-height: 1.7; }
 .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: .7rem; font-weight: 700; }
 .menu-tools { position: sticky; z-index: 10; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 22px 0; border-bottom: 1px solid var(--line); background: rgba(241,234,220,.92); backdrop-filter: blur(12px); }
-.category-tabs { display: flex; min-width: 0; gap: 8px; overflow-x: auto; scrollbar-width: none; mask-image: linear-gradient(to right, #000 92%, transparent); }
-.category-tabs::-webkit-scrollbar { display: none; }
-.category-tabs button { flex: 0 0 auto; padding: 9px 14px; border: 1px solid var(--line); border-radius: 999px; background: transparent; font-size: .68rem; font-weight: 700; cursor: pointer; }
-.category-tabs button.active { border-color: var(--ink); background: var(--ink); color: var(--cream); }
+.menu-filter { position: relative; display: flex; align-items: center; gap: 8px; }
+.menu-filter-toggle { display: inline-flex; align-items: center; gap: 10px; padding: 11px 16px; border: 1px solid var(--ink); border-radius: 999px; background: transparent; color: var(--ink); font-size: .72rem; font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .2s ease, color .2s ease; }
+.menu-filter-toggle:hover, .menu-filter-toggle[aria-expanded="true"], .menu-filter-toggle.is-filtered { background: var(--ink); color: var(--cream); }
+.menu-filter-chevron { transition: transform .2s ease; }
+.menu-filter-toggle[aria-expanded="true"] .menu-filter-chevron { transform: rotate(180deg); }
+.menu-filter-clear { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; }
+.menu-filter-clear:hover { border-color: var(--ink); }
+.menu-filter-panel { position: absolute; z-index: 20; top: calc(100% + 10px); left: 0; width: min(340px, calc(100vw - 34px)); max-height: min(70vh, 520px); overflow-y: auto; padding: 10px; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); box-shadow: 0 24px 60px rgba(23,20,15,.18); animation: menu-filter-in .18s ease-out; scrollbar-width: thin; scrollbar-color: rgba(23,20,15,.25) transparent; }
+.menu-filter-panel p { margin: 6px 10px 8px; color: #91887b; font-size: .58rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+.menu-filter-panel ul { display: grid; margin: 0; padding: 0; list-style: none; }
+.menu-filter-panel li button { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); font-size: .82rem; font-weight: 600; text-align: left; cursor: pointer; }
+.menu-filter-panel li button:hover { background: rgba(23,20,15,.06); }
+.menu-filter-panel li button.active { background: var(--ink); color: var(--cream); }
+.menu-filter-panel small { color: inherit; font-size: .65rem; opacity: .55; }
+@keyframes menu-filter-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 .menu-search { display: flex; width: 210px; align-items: center; gap: 8px; padding: 9px 13px; border-bottom: 1px solid var(--ink); }
 .menu-search input { width: 100%; border: 0; outline: 0; background: transparent; }
 .menu-list { display: grid; }

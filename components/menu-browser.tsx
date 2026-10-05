@@ -1,7 +1,7 @@
 "use client";
 
-import { Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { MenuCategory, MenuItem } from "@/data/menu";
 
 export function MenuBrowser({
@@ -13,6 +13,50 @@ export function MenuBrowser({
 }) {
   const [active, setActive] = useState("all");
   const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const activeCategory = categories.find((category) => category.id === active);
+  const counts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const item of items) {
+      if (item.available) map.set(item.categoryId, (map.get(item.categoryId) ?? 0) + 1);
+    }
+    return map;
+  }, [items]);
+  const totalCount = items.filter((item) => item.available).length;
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!filterRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const choose = (categoryId: string) => {
+    setActive(categoryId);
+    setOpen(false);
+    const list = listRef.current;
+    const tools = filterRef.current?.closest(".menu-tools");
+    if (!list || !tools) return;
+    const toolsHeight = tools.getBoundingClientRect().height;
+    if (list.getBoundingClientRect().top < toolsHeight) {
+      window.scrollTo({
+        top: window.scrollY + list.getBoundingClientRect().top - toolsHeight,
+        behavior: "smooth",
+      });
+    }
+  };
 
   const groups = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("mk");
@@ -36,22 +80,60 @@ export function MenuBrowser({
   return (
     <>
       <div className="menu-tools">
-        <div className="category-tabs" role="tablist" aria-label="Категории">
+        <div className="menu-filter" ref={filterRef}>
           <button
-            className={active === "all" ? "active" : ""}
-            onClick={() => setActive("all")}
+            type="button"
+            className={`menu-filter-toggle${active !== "all" ? " is-filtered" : ""}`}
+            aria-haspopup="true"
+            aria-expanded={open}
+            aria-controls="menu-filter-panel"
+            onClick={() => setOpen((value) => !value)}
           >
-            Сè
+            <SlidersHorizontal size={16} />
+            <span>{activeCategory ? activeCategory.name : "Филтер"}</span>
+            <ChevronDown size={16} className="menu-filter-chevron" />
           </button>
-          {categories.map((category) => (
+          {active !== "all" ? (
             <button
-              key={category.id}
-              className={active === category.id ? "active" : ""}
-              onClick={() => setActive(category.id)}
+              type="button"
+              className="menu-filter-clear"
+              aria-label="Исчисти филтер"
+              onClick={() => choose("all")}
             >
-              {category.name}
+              <X size={15} />
             </button>
-          ))}
+          ) : null}
+          {open ? (
+            <div className="menu-filter-panel" id="menu-filter-panel">
+              <p>Категории</p>
+              <ul>
+                <li>
+                  <button
+                    type="button"
+                    className={active === "all" ? "active" : ""}
+                    aria-pressed={active === "all"}
+                    onClick={() => choose("all")}
+                  >
+                    <span>Сè</span>
+                    <small>{totalCount}</small>
+                  </button>
+                </li>
+                {categories.map((category) => (
+                  <li key={category.id}>
+                    <button
+                      type="button"
+                      className={active === category.id ? "active" : ""}
+                      aria-pressed={active === category.id}
+                      onClick={() => choose(category.id)}
+                    >
+                      <span>{category.name}</span>
+                      <small>{counts.get(category.id) ?? 0}</small>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </div>
         <label className="menu-search">
           <Search size={17} />
@@ -63,7 +145,7 @@ export function MenuBrowser({
           />
         </label>
       </div>
-      <div className="menu-list">
+      <div className="menu-list" ref={listRef}>
         {groups.map(({ category, items: groupItems }) => (
           <section className="menu-group" key={category.id} aria-labelledby={`menu-${category.id}`}>
             <header className="menu-group-heading">
