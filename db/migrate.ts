@@ -4,9 +4,17 @@ import path from "node:path";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { getDb } from "./client";
 
-await migrate(getDb(), {
-  migrationsFolder: path.resolve("db/migrations"),
-});
+async function main() {
+  await migrate(getDb(), {
+    migrationsFolder: path.resolve("db/migrations"),
+  });
+  console.log("Database migrations complete.");
+}
 
-console.log("Database migrations complete.");
-process.exit(0);
+main().then(
+  () => process.exit(0),
+  (error) => {
+    console.error(error);
+    process.exit(1);
+  },
+);
