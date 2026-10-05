@@ -105,12 +105,14 @@ export default async function Home() {
         </section>
 
         <section className="visit-section" id="visit">
-          <div className="visit-map" aria-hidden="true">
-            <div className="map-grid" />
-            <span className="map-road road-one" />
-            <span className="map-road road-two" />
-            <div className="map-pin"><MapPin /></div>
-            <span className="map-label">BLA BLA</span>
+          <div className="visit-map">
+            <iframe
+              title="Bla Bla Cafe на мапа"
+              src="https://maps.google.com/maps?q=Bla%20Bla%20cafe%2C%20%D0%A1%D1%82%D1%80%D1%83%D0%BC%D0%B8%D1%86%D0%B0&ll=41.4306103,22.6447168&z=17&hl=mk&output=embed"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+            />
           </div>
           <div className="visit-copy">
             <p className="eyebrow">Посети нè</p>
