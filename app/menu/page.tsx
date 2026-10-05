@@ -7,7 +7,7 @@ import { getMenu } from "@/lib/content";
 
 export const metadata = {
   title: "Мени",
-  description: "Кафе, свежи пијалаци и вечерна понуда во Bla Bla Cafe, Струмица.",
+  description: "Целото мени на Bla Bla Cafe, Струмица: кафе, сокови, пиво, коктели и аперитиви.",
 };
 
 export default async function MenuPage() {
@@ -22,18 +22,17 @@ export default async function MenuPage() {
             <Link href="/" className="back-link">
               <ArrowLeft size={16} /> Почетна
             </Link>
-            <p className="eyebrow">Кратко мени, долги муабети</p>
+            <p className="eyebrow">Цело мени, долги муабети</p>
             <h1>Одбери го твојот <em>момент.</em></h1>
           </div>
           <p className="menu-note">
-            Ова е избор од јавно потврдената понуда. Целосното мени пристигнува
-            наскоро.
+            Од првото еспресо до последниот коктел. Сите цени се во денари.
           </p>
         </section>
         <MenuBrowser categories={categories} items={items} />
         {source === "seed" ? (
           <p className="prototype-note">
-            Прототип · содржината моментално се вчитува од проверени демо-податоци
+            Прототип · менито моментално се вчитува од локални податоци
           </p>
         ) : null}
       </main>

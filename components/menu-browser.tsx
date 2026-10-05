@@ -14,9 +14,9 @@ export function MenuBrowser({
   const [active, setActive] = useState("all");
   const [query, setQuery] = useState("");
 
-  const visible = useMemo(() => {
+  const groups = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("mk");
-    return items.filter(
+    const visible = items.filter(
       (item) =>
         item.available &&
         (active === "all" || item.categoryId === active) &&
@@ -25,7 +25,13 @@ export function MenuBrowser({
             .toLocaleLowerCase("mk")
             .includes(normalized)),
     );
-  }, [active, items, query]);
+    return categories
+      .map((category) => ({
+        category,
+        items: visible.filter((item) => item.categoryId === category.id),
+      }))
+      .filter((group) => group.items.length);
+  }, [active, categories, items, query]);
 
   return (
     <>
@@ -58,29 +64,37 @@ export function MenuBrowser({
         </label>
       </div>
       <div className="menu-list">
-        {visible.map((item, index) => (
-          <article className="menu-row" key={item.id}>
-            <span className="menu-index">{String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <div className="menu-name-line">
-                <h2>{item.name}</h2>
-                {item.badge ? <span className="menu-badge">{item.badge}</span> : null}
-              </div>
-              <p>{item.description}</p>
-            </div>
-            <strong className="menu-price">
-              {item.price ? (
-                <>
-                  {item.price}
-                  <small> ден.</small>
-                </>
-              ) : (
-                <small>прашај нè</small>
-              )}
-            </strong>
-          </article>
+        {groups.map(({ category, items: groupItems }) => (
+          <section className="menu-group" key={category.id} aria-labelledby={`menu-${category.id}`}>
+            <header className="menu-group-heading">
+              <h2 id={`menu-${category.id}`}>{category.name}</h2>
+              {category.eyebrow ? <span>{category.eyebrow}</span> : null}
+            </header>
+            {groupItems.map((item, index) => (
+              <article className="menu-row" key={item.id}>
+                <span className="menu-index">{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <div className="menu-name-line">
+                    <h3>{item.name}</h3>
+                    {item.badge ? <span className="menu-badge">{item.badge}</span> : null}
+                  </div>
+                  {item.description ? <p>{item.description}</p> : null}
+                </div>
+                <strong className="menu-price">
+                  {item.price ? (
+                    <>
+                      {item.price}
+                      <small> ден.</small>
+                    </>
+                  ) : (
+                    <small>прашај нè</small>
+                  )}
+                </strong>
+              </article>
+            ))}
+          </section>
         ))}
-        {!visible.length ? (
+        {!groups.length ? (
           <p className="empty-state">Нема производи што одговараат на пребарувањето.</p>
         ) : null}
       </div>

@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 import { hash } from "@node-rs/argon2";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { menuCategories as seedCategories, menuItems as seedItems } from "../data/menu";
 import { getDb } from "./client";
 import {
@@ -12,6 +12,10 @@ import {
 } from "./schema";
 
 const db = getDb();
+
+// Categories from the early prototype menu, replaced by the printed menu. Deleting them cascades to their items.
+const retiredCategorySlugs = ["coffee", "cold", "food", "evening"];
+await db.delete(menuCategories).where(inArray(menuCategories.slug, retiredCategorySlugs));
 
 for (const category of seedCategories) {
   await db

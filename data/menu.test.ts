@@ -14,6 +14,18 @@ describe("prototype menu", () => {
     );
   });
 
+  it("uses slug-safe item identifiers", () => {
+    expect(menuItems.every((item) => /^[a-z0-9-]+$/.test(item.id))).toBe(true);
+  });
+
+  it("has at least one item in every category", () => {
+    expect(
+      menuCategories.every((category) =>
+        menuItems.some((item) => item.categoryId === category.id),
+      ),
+    ).toBe(true);
+  });
+
   it("never publishes a non-positive price", () => {
     expect(
       menuItems
