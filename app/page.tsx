@@ -19,8 +19,8 @@ export default async function Home() {
         <section className="manifesto section-shell" id="story">
           <p className="vertical-label">НАШАТА ПРИКАЗНА</p>
           <div className="manifesto-copy">
-            <p className="eyebrow"><Sparkles size={14} /> Мал ритуал, секој ден</p>
-            <h2>Градот зборува.<br />Ние го вариме <em>муабетот.</em></h2>
+            <p className="eyebrow"><Sparkles size={14} /> За нас</p>
+            <h2>Кафе наутро,<br /><em>коктели навечер.</em></h2>
           </div>
           <div className="manifesto-side">
             <p>
