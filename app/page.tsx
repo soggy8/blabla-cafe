@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight, Camera, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
 import { HeroMotion } from "@/components/hero-motion";
 import { PoweredBy } from "@/components/powered-by";
+import { RitualVideo } from "@/components/ritual-video";
 import { SiteHeader } from "@/components/site-header";
 import { socialPosts } from "@/data/menu";
 import { getMenu } from "@/lib/content";
@@ -63,11 +64,7 @@ export default async function Home() {
         </section>
 
         <section className="ritual-section">
-          <div className="ritual-art" aria-hidden="true">
-            <span className="sand-dune sand-one" />
-            <span className="sand-dune sand-two" />
-            <div className="cezve"><span /></div>
-          </div>
+          <RitualVideo />
           <div className="ritual-copy">
             <p className="eyebrow">Бавно подготвено</p>
             <h2>Кафе на <em>песок.</em></h2>
