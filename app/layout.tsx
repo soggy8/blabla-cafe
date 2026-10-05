@@ -35,7 +35,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="mk" className={`${geist.variable} h-full antialiased`}>
+    <html
+      lang="mk"
+      className={`${geist.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+    >
       <body>
         <BusinessJsonLd />
         {children}
