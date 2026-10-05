@@ -36,6 +36,7 @@ export async function register() {
           description: item.description,
           price: item.price,
           badge: item.badge,
+          imagePath: item.image,
           featured: item.featured,
           available: item.available,
           sortOrder: index,

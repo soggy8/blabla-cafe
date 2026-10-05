@@ -12,6 +12,7 @@ export type MenuItem = {
   description: string;
   price?: number;
   badge?: "Ново" | "Ритуал" | "Понуда";
+  image?: string;
   featured?: boolean;
   available: boolean;
 };
@@ -47,7 +48,7 @@ const group = (categoryId: string, rows: Row[]): MenuItem[] =>
 
 export const menuItems: MenuItem[] = [
   ...group("hot-drinks", [
-    ["espresso", "Еспресо", 80, "Кратко, интензивно и подготвено со прецизност.", { featured: true }],
+    ["espresso", "Еспресо", 80, "Кратко, интензивно и подготвено со прецизност.", { featured: true, image: "/media/featured-espresso.webp" }],
     ["macchiato-small", "Макијато мало", 90],
     ["macchiato-large", "Макијато големо", 100],
     ["americano", "Американо", 80],
@@ -55,9 +56,9 @@ export const menuItems: MenuItem[] = [
     ["cocoa", "Какао", 120],
     ["cappuccino", "Капучино", 110],
     ["nescafe", "Нес кафе", 110],
-    ["turkish-coffee", "Турско кафе", 100, "Традиционално, бавно сварено во џезве.", { featured: true }],
+    ["turkish-coffee", "Турско кафе", 100, "Традиционално, бавно сварено во џезве.", { featured: true, image: "/media/featured-turkish-coffee.webp" }],
     ["freddo-espresso", "Фредо еспресо", 120],
-    ["freddo-cappuccino", "Фредо капучино", 120, "Ладно еспресо со кремаста млечна пена.", { featured: true }],
+    ["freddo-cappuccino", "Фредо капучино", 120, "Ладно еспресо со кремаста млечна пена.", { featured: true, image: "/media/featured-freddo-cappuccino.webp" }],
     ["hot-chocolate", "Топло чоколадо", 130, "Бело или црно"],
     ["tea", "Чај", 70, "Камилица, нане или овошен"],
   ]),
@@ -113,7 +114,7 @@ export const menuItems: MenuItem[] = [
     ["budweiser", "Budweiser", 160],
   ]),
   ...group("cocktails", [
-    ["aperol-spritz", "Aperol Spritz", 220, "Горчлив портокал, просеко и сода.", { featured: true }],
+    ["aperol-spritz", "Aperol Spritz", 220, "Горчлив портокал, просеко и сода.", { featured: true, image: "/media/featured-aperol-spritz.webp" }],
     ["cuba-libre", "Cuba Libre", 220],
     ["margarita", "Margarita", 220],
     ["mojito", "Mojito", 220],

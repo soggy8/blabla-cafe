@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Camera, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
 import { HeroMotion } from "@/components/hero-motion";
@@ -45,10 +46,22 @@ export default async function Home() {
           <div className="featured-grid section-shell">
             {featured.map((item, index) => (
               <article className={`feature-card feature-${index + 1}`} key={item.id}>
-                <div className="feature-visual" aria-hidden="true">
-                  <span className="feature-glow" />
-                  <span className="feature-vessel" />
-                  <span className="feature-number">0{index + 1}</span>
+                <div className="feature-visual">
+                  {item.image ? (
+                    <Image
+                      className="feature-photo"
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 25vw"
+                    />
+                  ) : (
+                    <>
+                      <span className="feature-glow" aria-hidden="true" />
+                      <span className="feature-vessel" aria-hidden="true" />
+                    </>
+                  )}
+                  <span className="feature-number" aria-hidden="true">0{index + 1}</span>
                 </div>
                 <div className="feature-copy">
                   <div>

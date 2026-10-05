@@ -138,7 +138,9 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .feature-2 .feature-vessel { width: 130px; height: 90px; border-radius: 50% 50% 42% 42%; }
 .feature-3 .feature-vessel { width: 145px; height: 72px; border-radius: 4px; transform: rotate(6deg); }
 .feature-4 .feature-vessel { width: 75px; height: 170px; border-radius: 5px 5px 25px 25px; background: linear-gradient(rgba(255,255,255,.2), #f0b765 10% 88%, rgba(255,255,255,.2)); }
-.feature-number { position: absolute; top: 15px; right: 18px; color: rgba(255,255,255,.5); font-family: Georgia, serif; font-style: italic; }
+.feature-photo { object-fit: cover; object-position: center 60%; transition: transform .6s ease; }
+.feature-card:hover .feature-photo { transform: scale(1.04); }
+.feature-number { position: absolute; z-index: 1; top: 15px; right: 18px; color: rgba(255,255,255,.5); font-family: Georgia, serif; font-style: italic; }
 .feature-copy { display: flex; height: 200px; flex-direction: column; justify-content: space-between; padding: 24px; }
 .feature-copy h3 { margin: 8px 0 8px; font-size: 1.35rem; letter-spacing: -.04em; }
 .feature-copy p { margin: 0; color: #686055; font-size: .78rem; line-height: 1.55; }
@@ -312,6 +314,7 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
   .circle-link { flex: 0 0 52px; width: 52px; height: 52px; }
   .featured-grid, .social-grid { grid-template-columns: 1fr; }
   .feature-card { min-height: 450px; }
+  .feature-visual { height: auto; aspect-ratio: 4 / 3; }
   .social-card, .social-card:last-child { grid-column: auto; min-height: 390px; }
   .ritual-art { min-height: 460px; }
   .visit-copy { min-height: 500px; padding: 75px 22px; }

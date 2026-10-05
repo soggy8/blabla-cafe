@@ -43,6 +43,7 @@ export async function getMenu(): Promise<{
         description: item.description,
         price: item.price ?? undefined,
         badge: item.badge as MenuItem["badge"],
+        image: item.imagePath ?? undefined,
         featured: item.featured,
         available: item.available,
       })),
