@@ -8,6 +8,7 @@ import { getMenu } from "@/lib/content";
 export const metadata = {
   title: "Мени",
   description: "Целото мени на Bla Bla Cafe, Струмица: кафе, сокови, пиво, коктели и аперитиви.",
+  alternates: { canonical: "/menu" },
 };
 
 export default async function MenuPage() {

@@ -61,9 +61,9 @@ em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; }
 .site-nav a:hover { opacity: .65; }
 .nav-cta { padding: 11px 18px; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; }
 .mobile-menu-button { display: none; border: 0; background: transparent; color: inherit; }
-body:has(.menu-page) .site-header { color: var(--ink); }
-body:has(.menu-page) .brand small { color: #766f64; }
-body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: var(--line); }
+body:has(.menu-page, .not-found-page) .site-header { color: var(--ink); }
+body:has(.menu-page, .not-found-page) .brand small { color: #766f64; }
+body:has(.menu-page, .not-found-page) .brand-mark, body:has(.menu-page, .not-found-page) .nav-cta { border-color: var(--line); }
 
 .hero {
   position: relative;
@@ -93,7 +93,7 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .hero-address { font-size: .78rem; font-weight: 650; }
 .hero-address small { display: block; margin-top: 6px; color: rgba(255,247,232,.5); font-size: .63rem; font-weight: 450; }
 .hero-art { position: relative; z-index: 2; display: grid; place-items: center; overflow: hidden; background: transparent; }
-.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 56% center; }
+.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 64% center; }
 .hero-video, .hero-video-shade {
   -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.45) 14%, #000 30%);
   mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,.45) 14%, #000 30%);
@@ -193,6 +193,11 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .estada-logo { display: block; width: 150px; height: auto; }
 .powered-by:hover .estada-mark, .powered-by:focus-visible .estada-mark { transform: translateY(-2px); filter: brightness(1.25); }
 
+.not-found-page { display: flex; min-height: 100vh; flex-direction: column; justify-content: center; padding: 140px max(4vw, calc((100vw - 1240px)/2)) 90px; background: var(--paper); }
+.not-found-page h1 { max-width: 900px; margin: 0; font-size: clamp(3.1rem, 7vw, 7rem); font-weight: 700; letter-spacing: -.065em; line-height: .9; }
+.not-found-page h1 em { color: var(--rust); }
+.not-found-page > p:not(.eyebrow) { max-width: 460px; margin: 30px 0 0; color: #686055; line-height: 1.7; }
+.not-found-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 40px; }
 .menu-page { min-height: 100vh; padding: 150px max(4vw, calc((100vw - 1240px)/2)) 100px; background: var(--paper); }
 .menu-page + .menu-footer, .menu-page ~ .menu-footer { background: var(--ink); color: var(--cream); }
 .menu-page .site-header { color: var(--ink); }
@@ -302,7 +307,7 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
   .hero-intro { margin-top: 25px; font-size: .88rem; }
   .hero-actions { align-items: flex-start; flex-direction: column; gap: 18px; }
   .hero-art { min-height: 520px; margin-top: -105px; overflow: hidden; }
-  .hero-video { object-position: 52% center; }
+  .hero-video { object-position: 60% center; }
   .cup { width: 210px; height: 145px; }
   .hero-stamp { right: 4%; bottom: 9%; }
   .manifesto { grid-template-columns: 1fr; gap: 30px; padding-block: 100px; }
