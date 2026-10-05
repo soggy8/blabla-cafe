@@ -27,7 +27,7 @@ export default async function Home() {
               Bla Bla е урбано катче за првото кафе, попладневната пауза и
               вечерите што спонтано траат подолго.
             </p>
-            <span>Во срцето на Струмица · од 2026</span>
+            <span>Маршал Тито 146 · Струмица</span>
           </div>
         </section>
 
@@ -114,7 +114,7 @@ export default async function Home() {
           </div>
           <div className="visit-copy">
             <p className="eyebrow">Посети нè</p>
-            <h2>Во центарот на <em>Струмица.</em></h2>
+            <h2>Маршал Тито 146, <em>Струмица.</em></h2>
             <ul>
               <li><MapPin /><span>Маршал Тито 146<small>Струмица 2400</small></span></li>
               <li><Clock3 /><span>Секој ден<small>08:00—01:00</small></span></li>

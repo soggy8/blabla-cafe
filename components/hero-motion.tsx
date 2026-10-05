@@ -35,7 +35,7 @@ export function HeroMotion() {
           transition={{ duration: 0.8, delay: 0.35 }}
         >
           Од првото утринско еспресо до последниот вечерен муабет —
-          твоето место во срцето на Струмица.
+          твоето место во Струмица.
         </motion.p>
         <motion.div
           className="hero-actions"
