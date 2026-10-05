@@ -113,8 +113,8 @@ export default async function Home() {
             <span className="map-label">BLA BLA</span>
           </div>
           <div className="visit-copy">
-            <p className="eyebrow">Се гледаме таму</p>
-            <h2>Дојди на едно <em>bla bla.</em></h2>
+            <p className="eyebrow">Посети нè</p>
+            <h2>Во центарот на <em>Струмица.</em></h2>
             <ul>
               <li><MapPin /><span>Маршал Тито 146<small>Струмица 2400</small></span></li>
               <li><Clock3 /><span>Секој ден<small>08:00—01:00</small></span></li>
