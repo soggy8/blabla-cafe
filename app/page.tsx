@@ -130,7 +130,6 @@ export default async function Home() {
         </section>
       </main>
       <footer className="site-footer">
-        <div className="footer-wordmark">BLA BLA</div>
         <div>
           <span>КАФЕ · МУАБЕТ · СТРУМИЦА</span>
           <PoweredBy />

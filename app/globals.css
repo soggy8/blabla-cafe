@@ -193,9 +193,8 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 .visit-copy li small { display: block; margin-top: 4px; color: #766d61; font-size: .68rem; font-weight: 450; }
 .visit-actions { display: flex; gap: 10px; }
 
-.site-footer { padding: 70px 4vw 30px; background: var(--ink); color: var(--cream); }
-.footer-wordmark { overflow: hidden; font-size: clamp(7rem, 21vw, 22rem); font-weight: 800; letter-spacing: -.1em; line-height: .7; white-space: nowrap; }
-.site-footer > div:last-child { display: flex; align-items: center; justify-content: space-between; margin-top: 55px; color: rgba(255,247,232,.45); font-size: .55rem; letter-spacing: .16em; }
+.site-footer { padding: 32px 4vw; background: var(--ink); color: var(--cream); }
+.site-footer > div:last-child { display: flex; align-items: center; justify-content: space-between; color: rgba(255,247,232,.45); font-size: .55rem; letter-spacing: .16em; }
 .powered-by { display: inline-flex; align-items: center; gap: 14px; color: rgba(255,247,232,.7); font-size: .78rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; transition: color .25s ease; }
 .powered-by:hover, .powered-by:focus-visible { color: var(--cream); }
 .estada-mark { display: flex; align-items: center; gap: 10px; transition: transform .25s ease, filter .25s ease; }
@@ -325,7 +324,6 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
   .ritual-copy, .visit-copy { min-height: 500px; padding: 75px 22px; }
   .visit-copy h2, .ritual-copy h2 { font-size: 3.8rem; }
   .visit-actions { align-items: stretch; flex-direction: column; }
-  .footer-wordmark { font-size: 6.3rem; }
   .site-footer > div:last-child { gap: 20px; flex-direction: column; }
   .menu-page { padding: 110px 17px 70px; }
   .menu-hero { grid-template-columns: 1fr; gap: 28px; padding-bottom: 55px; }
