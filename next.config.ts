@@ -20,6 +20,11 @@ const contentSecurityPolicy = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "9mb",
+    },
+  },
   async headers() {
     return [
       {
