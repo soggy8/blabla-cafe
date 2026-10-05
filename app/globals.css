@@ -147,7 +147,7 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
 
 .ritual-section { display: grid; min-height: 720px; grid-template-columns: 1.2fr .8fr; background: #17140f; color: var(--cream); }
 .ritual-art { position: relative; min-height: 620px; overflow: hidden; background: #17140f; }
-.ritual-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 45% center; -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.5) 12%, #000 28%); mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,.5) 12%, #000 28%); }
+.ritual-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 45% center; -webkit-mask-image: linear-gradient(to left, transparent 0%, #000 14%); mask-image: linear-gradient(to left, transparent 0%, #000 14%); }
 .ritual-copy { display: flex; flex-direction: column; justify-content: center; padding: 90px 8vw 90px 5vw; }
 .ritual-copy h2 { margin-bottom: 30px; }
 .ritual-copy h2 em { color: var(--amber-light); }
@@ -284,10 +284,11 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
   .feature-card:nth-child(even) { margin-top: 0; }
   .ritual-section, .visit-section { grid-template-columns: 1fr; }
   .ritual-video {
-    -webkit-mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,.5) 14%, #000 32%);
-    mask-image: linear-gradient(to top, transparent 0%, rgba(0,0,0,.5) 14%, #000 32%);
+    -webkit-mask-image: linear-gradient(to top, transparent 0%, #000 12%);
+    mask-image: linear-gradient(to top, transparent 0%, #000 12%);
   }
-  .ritual-copy, .visit-copy { min-height: 550px; }
+  .visit-copy { min-height: 550px; }
+  .ritual-copy { padding-top: 40px; }
   .social-grid { grid-template-columns: 1fr 1fr; }
   .social-card:last-child { grid-column: 1 / -1; min-height: 330px; }
 }
@@ -313,7 +314,8 @@ body:has(.menu-page) .brand-mark, body:has(.menu-page) .nav-cta { border-color: 
   .feature-card { min-height: 450px; }
   .social-card, .social-card:last-child { grid-column: auto; min-height: 390px; }
   .ritual-art { min-height: 460px; }
-  .ritual-copy, .visit-copy { min-height: 500px; padding: 75px 22px; }
+  .visit-copy { min-height: 500px; padding: 75px 22px; }
+  .ritual-copy { padding: 32px 22px 75px; }
   .visit-copy h2, .ritual-copy h2 { font-size: 3.8rem; }
   .visit-actions { align-items: stretch; flex-direction: column; }
   .site-footer > div:last-child { gap: 20px; flex-direction: column; }
