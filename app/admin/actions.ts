@@ -5,7 +5,12 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { authenticateOwner, getCurrentOwner, logoutOwner } from "@/lib/auth";
+import {
+  authenticateOwner,
+  changeOwnerPassword,
+  getCurrentOwner,
+  logoutOwner,
+} from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { deleteImageUpload, saveImageUpload } from "@/lib/uploads";
 import { getDb } from "@/db/client";
@@ -15,6 +20,22 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).max(200),
 });
+
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Внесете ја тековната лозинка.").max(200),
+    newPassword: z
+      .string()
+      .min(12, "Новата лозинка мора да има најмалку 12 знаци.")
+      .max(200, "Новата лозинка е предолга."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Новите лозинки не се совпаѓаат.",
+  })
+  .refine((data) => data.newPassword !== data.currentPassword, {
+    message: "Новата лозинка мора да се разликува од тековната.",
+  });
 
 const slugField = z
   .string()
@@ -76,6 +97,24 @@ export async function loginAction(
 export async function logoutAction() {
   await logoutOwner();
   redirect("/admin/login");
+}
+
+export async function changePasswordAction(
+  _state: { error?: string; success?: boolean },
+  formData: FormData,
+) {
+  const owner = await getCurrentOwner();
+  if (!owner) redirect("/admin/login");
+
+  const parsed = passwordSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Проверете ги внесените податоци." };
+  }
+  const { currentPassword, newPassword } = parsed.data;
+  if (!(await changeOwnerPassword(owner.id, currentPassword, newPassword))) {
+    return { error: "Тековната лозинка не е точна." };
+  }
+  return { success: true };
 }
 
 export async function saveMenuItemAction(formData: FormData) {

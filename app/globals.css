@@ -249,6 +249,8 @@ body:has(.menu-page, .not-found-page) .brand-mark, body:has(.menu-page, .not-fou
 .admin-form input, .admin-form textarea, .admin-form select { width: 100%; border: 1px solid var(--line); outline: 0; background: rgba(255,255,255,.45); padding: 12px; text-transform: none; }
 .admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus { border-color: var(--rust); }
 .form-error { margin: 0; color: #a1261f; font-size: .72rem; }
+.form-success { margin: 0; color: #2f6b3a; font-size: .72rem; font-weight: 700; }
+.password-form { max-width: 640px; margin: 10px 0 0; }
 .admin-header { display: flex; align-items: center; justify-content: space-between; width: min(1080px, 100%); margin: 0 auto 50px; }
 .admin-header h1 { margin: 0; font-size: 4rem; letter-spacing: -.07em; }
 .admin-actions { display: flex; align-items: center; gap: 10px; }

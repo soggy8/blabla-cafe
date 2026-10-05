@@ -1,8 +1,8 @@
 import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
-import { verify } from "@node-rs/argon2";
-import { and, eq, gt } from "drizzle-orm";
+import { hash, verify } from "@node-rs/argon2";
+import { and, eq, gt, isNull, lt, ne, or } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getDb, hasDatabase } from "@/db/client";
 import { loginAttempts, owners, sessions } from "@/db/schema";
@@ -62,6 +62,7 @@ export async function authenticateOwner(
   }
 
   await db.delete(loginAttempts).where(eq(loginAttempts.key, throttleKey));
+  await deleteStaleAuthRows();
 
   const token = randomBytes(32).toString("base64url");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
@@ -104,6 +105,52 @@ export async function getCurrentOwner() {
   return result ?? null;
 }
 
+export async function changeOwnerPassword(
+  ownerId: string,
+  currentPassword: string,
+  newPassword: string,
+) {
+  const db = getDb();
+  const [owner] = await db
+    .select({ passwordHash: owners.passwordHash })
+    .from(owners)
+    .where(eq(owners.id, ownerId))
+    .limit(1);
+  if (!owner || !(await verify(owner.passwordHash, currentPassword))) {
+    return false;
+  }
+
+  await db
+    .update(owners)
+    .set({ passwordHash: await hash(newPassword) })
+    .where(eq(owners.id, ownerId));
+
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  await db
+    .delete(sessions)
+    .where(
+      token
+        ? and(eq(sessions.ownerId, ownerId), ne(sessions.tokenHash, hashToken(token)))
+        : eq(sessions.ownerId, ownerId),
+    );
+  return true;
+}
+
+async function deleteStaleAuthRows() {
+  const db = getDb();
+  const now = new Date();
+  const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  await db.delete(sessions).where(lt(sessions.expiresAt, now));
+  await db
+    .delete(loginAttempts)
+    .where(
+      and(
+        lt(loginAttempts.updatedAt, dayAgo),
+        or(isNull(loginAttempts.blockedUntil), lt(loginAttempts.blockedUntil, now)),
+      ),
+    );
+}
+
 export async function logoutOwner() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
@@ -111,6 +158,7 @@ export async function logoutOwner() {
     await getDb()
       .delete(sessions)
       .where(eq(sessions.tokenHash, hashToken(token)));
+    await deleteStaleAuthRows();
   }
   cookieStore.delete(SESSION_COOKIE);
 }

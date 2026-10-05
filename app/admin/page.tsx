@@ -1,12 +1,11 @@
 import { asc } from "drizzle-orm";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
   Database,
   ExternalLink,
   FolderOpen,
-  ImageIcon,
+  KeyRound,
   LogOut,
   Plus,
 } from "lucide-react";
@@ -15,16 +14,12 @@ import {
   menuCategories,
   menuItems,
   type MenuCategoryRecord,
-  type MenuItemRecord,
 } from "@/db/schema";
 import { getCurrentOwner } from "@/lib/auth";
-import {
-  deleteMenuItemAction,
-  logoutAction,
-  saveCategoryAction,
-  saveMenuItemAction,
-} from "./actions";
+import { logoutAction, saveCategoryAction } from "./actions";
+import { ItemEditor, LazyDetails, MenuItemForm } from "./item-editor";
 import { ItemFilter } from "./item-filter";
+import { PasswordForm } from "./password-form";
 
 export const dynamic = "force-dynamic";
 
@@ -55,8 +50,24 @@ export default async function AdminPage() {
   const db = getDb();
   const [categories, items] = await Promise.all([
     db.select().from(menuCategories).orderBy(asc(menuCategories.sortOrder)),
-    db.select().from(menuItems).orderBy(asc(menuItems.sortOrder)),
+    db
+      .select({
+        id: menuItems.id,
+        categoryId: menuItems.categoryId,
+        slug: menuItems.slug,
+        name: menuItems.name,
+        description: menuItems.description,
+        price: menuItems.price,
+        badge: menuItems.badge,
+        imagePath: menuItems.imagePath,
+        featured: menuItems.featured,
+        available: menuItems.available,
+        sortOrder: menuItems.sortOrder,
+      })
+      .from(menuItems)
+      .orderBy(asc(menuItems.sortOrder)),
   ]);
+  const categoryOptions = categories.map(({ id, name }) => ({ id, name }));
   const nextCategoryOrder =
     Math.max(0, ...categories.map((category) => category.sortOrder)) + 1;
 
@@ -80,21 +91,25 @@ export default async function AdminPage() {
       </header>
 
       <div className="admin-toolbar">
-        <details className="admin-editor">
-          <summary>
+        <LazyDetails
+          className="admin-editor"
+          summary={
             <span className="summary-title">
               <Plus size={17} /> Додај производ
             </span>
-          </summary>
-          <MenuItemForm categories={categories} />
-        </details>
+          }
+        >
+          <MenuItemForm categories={categoryOptions} />
+        </LazyDetails>
 
-        <details className="admin-editor">
-          <summary>
+        <LazyDetails
+          className="admin-editor"
+          summary={
             <span className="summary-title">
               <FolderOpen size={17} /> Категории ({categories.length})
             </span>
-          </summary>
+          }
+        >
           <div className="category-manager">
             <p className="admin-hint">
               Скриената категорија и нејзините производи не се прикажуваат на
@@ -105,7 +120,20 @@ export default async function AdminPage() {
             ))}
             <CategoryForm nextOrder={nextCategoryOrder} />
           </div>
-        </details>
+        </LazyDetails>
+
+        <LazyDetails
+          className="admin-editor"
+          summary={
+            <span className="summary-title">
+              <KeyRound size={17} /> Лозинка · {owner.email}
+            </span>
+          }
+        >
+          <div className="category-manager">
+            <PasswordForm />
+          </div>
+        </LazyDetails>
       </div>
 
       <section className="admin-grid">
@@ -130,7 +158,7 @@ export default async function AdminPage() {
                   <ItemEditor
                     key={item.id}
                     item={item}
-                    categories={categories}
+                    categories={categoryOptions}
                   />
                 ))}
               </section>
@@ -139,55 +167,6 @@ export default async function AdminPage() {
         </ItemFilter>
       </section>
     </main>
-  );
-}
-
-function ItemEditor({
-  item,
-  categories,
-}: {
-  item: MenuItemRecord;
-  categories: MenuCategoryRecord[];
-}) {
-  const search = [item.name, item.description, item.slug]
-    .join(" ")
-    .toLocaleLowerCase("mk");
-
-  return (
-    <details className="admin-editor" data-search={search}>
-      <summary>
-        <span className="item-summary">
-          {item.imagePath ? (
-            <Image
-              className="item-thumb"
-              src={item.imagePath}
-              alt=""
-              width={44}
-              height={44}
-              unoptimized
-            />
-          ) : (
-            <span className="item-thumb empty" aria-hidden="true">
-              <ImageIcon size={16} />
-            </span>
-          )}
-          <span>
-            <strong>{item.name}</strong>
-            <small>
-              {item.price ? `${item.price} ден.` : "цена по избор"} ·{" "}
-              {item.available ? "достапно" : "скриено"}
-              {item.featured ? " · истакнат" : ""}
-            </small>
-          </span>
-        </span>
-        <span className="edit-label">Уреди</span>
-      </summary>
-      <MenuItemForm categories={categories} item={item} />
-      <form action={deleteMenuItemAction}>
-        <input type="hidden" name="id" value={item.id} />
-        <button className="danger-link">Избриши производ</button>
-      </form>
-    </details>
   );
 }
 
@@ -244,113 +223,6 @@ function CategoryForm({
       </label>
       <button className="button button-solid" type="submit">
         {category ? "Зачувај" : "Додај"}
-      </button>
-    </form>
-  );
-}
-
-function MenuItemForm({
-  categories,
-  item,
-}: {
-  categories: MenuCategoryRecord[];
-  item?: MenuItemRecord;
-}) {
-  return (
-    <form action={saveMenuItemAction} className="admin-form item-form">
-      {item ? <input type="hidden" name="id" value={item.id} /> : null}
-      <div className="field-row">
-        <label>
-          Име
-          <input name="name" defaultValue={item?.name} required minLength={2} />
-        </label>
-        <label>
-          Slug
-          <input
-            name="slug"
-            defaultValue={item?.slug}
-            pattern="[a-z0-9-]+"
-            placeholder="се создава автоматски"
-          />
-        </label>
-      </div>
-      <label>
-        Опис
-        <textarea name="description" defaultValue={item?.description} rows={3} />
-      </label>
-      <div className="field-row thirds">
-        <label>
-          Категорија
-          <select name="categoryId" defaultValue={item?.categoryId} required>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Цена (ден.)
-          <input name="price" type="number" min={1} defaultValue={item?.price ?? ""} />
-        </label>
-        <label>
-          Редослед
-          <input
-            name="sortOrder"
-            type="number"
-            min={0}
-            defaultValue={item?.sortOrder ?? 0}
-            required
-          />
-        </label>
-      </div>
-      <label>
-        Ознака
-        <input name="badge" defaultValue={item?.badge ?? ""} placeholder="Ново" />
-      </label>
-      <div className="image-field">
-        {item?.imagePath ? (
-          <Image
-            className="image-preview"
-            src={item.imagePath}
-            alt={`Фотографија од ${item.name}`}
-            width={120}
-            height={120}
-            unoptimized
-          />
-        ) : null}
-        <label>
-          {item?.imagePath ? "Замени фотографија" : "Фотографија"}
-          <input name="image" type="file" accept="image/jpeg,image/png,image/webp" />
-          <small>JPG, PNG или WebP до 8 MB.</small>
-        </label>
-        {item?.imagePath ? (
-          <label className="inline-check">
-            <input name="removeImage" type="checkbox" />
-            Отстрани фотографија
-          </label>
-        ) : null}
-      </div>
-      <div className="check-row">
-        <label>
-          <input
-            name="featured"
-            type="checkbox"
-            defaultChecked={item?.featured}
-          />
-          Истакнат производ
-        </label>
-        <label>
-          <input
-            name="available"
-            type="checkbox"
-            defaultChecked={item?.available ?? true}
-          />
-          Достапен
-        </label>
-      </div>
-      <button className="button button-solid" type="submit">
-        Зачувај
       </button>
     </form>
   );
