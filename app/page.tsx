@@ -6,10 +6,10 @@ import { PoweredBy } from "@/components/powered-by";
 import { RitualVideo } from "@/components/ritual-video";
 import { SiteHeader } from "@/components/site-header";
 import { socialPosts } from "@/data/menu";
-import { getMenu } from "@/lib/content";
+import { getFeedPosts, getMenu } from "@/lib/content";
 
 export default async function Home() {
-  const { items } = await getMenu();
+  const [{ items }, feedPosts] = await Promise.all([getMenu(), getFeedPosts()]);
   const featured = items.filter((item) => item.featured && item.available).slice(0, 4);
 
   return (
@@ -102,7 +102,17 @@ export default async function Home() {
             </a>
           </div>
           <div className="social-grid">
-            {socialPosts.map((post, index) => (
+            {feedPosts.length >= 3
+              ? feedPosts.map((post, index) => (
+                  <a className="social-card social-photo" href={post.href} target="_blank" rel="noreferrer" key={post.id}>
+                    <Image src={post.image} alt={post.title || "Објава од Instagram"} fill sizes="(max-width: 900px) 100vw, 33vw" />
+                    <span className="social-date">{post.date}</span>
+                    {post.title && <h3>{post.title}</h3>}
+                    <span className="social-arrow"><ArrowUpRight /></span>
+                    <span className="social-index">0{index + 1}</span>
+                  </a>
+                ))
+              : socialPosts.map((post, index) => (
               <a className={`social-card social-${post.kind}`} href={post.href} target="_blank" rel="noreferrer" key={post.id}>
                 <span className="social-date">{post.date}</span>
                 <span className="social-shape" aria-hidden="true" />

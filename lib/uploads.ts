@@ -46,7 +46,7 @@ export async function deleteImageUpload(publicPath: string | null | undefined) {
   await rm(path.join(uploadDirectory(), filename), { force: true });
 }
 
-function uploadDirectory() {
+export function uploadDirectory() {
   return path.resolve(
     /* turbopackIgnore: true */ process.env.UPLOAD_DIR ?? "./storage/uploads",
   );

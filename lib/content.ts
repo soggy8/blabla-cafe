@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import {
   menuCategories as seedCategories,
   menuItems as seedItems,
@@ -6,7 +6,7 @@ import {
   type MenuItem,
 } from "@/data/menu";
 import { getDb, hasDatabase } from "@/db/client";
-import { menuCategories, menuItems } from "@/db/schema";
+import { menuCategories, menuItems, socialPosts } from "@/db/schema";
 
 export async function getMenu(): Promise<{
   categories: MenuCategory[];
@@ -51,5 +51,45 @@ export async function getMenu(): Promise<{
   } catch (error) {
     console.error("Database menu lookup failed; using bundled menu.", error);
     return { categories: seedCategories, items: seedItems, source: "seed" };
+  }
+}
+
+export type FeedPost = {
+  id: string;
+  title: string;
+  date: string;
+  href: string;
+  image: string;
+};
+
+const feedDate = new Intl.DateTimeFormat("mk-MK", { day: "numeric", month: "long" });
+
+export async function getFeedPosts(limit = 3): Promise<FeedPost[]> {
+  if (!hasDatabase()) return [];
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(socialPosts)
+      .orderBy(desc(socialPosts.publishedAt))
+      .limit(12);
+
+    return rows
+      .filter((row) => row.mediaUrl)
+      .slice(0, limit)
+      .map((row) => {
+        const firstLine = row.caption?.split("\n")[0]?.trim() ?? "";
+        return {
+          id: row.id,
+          title:
+            firstLine.length > 60 ? `${firstLine.slice(0, 57).trimEnd()}…` : firstLine,
+          date: feedDate.format(row.publishedAt),
+          href: row.permalink,
+          image: row.mediaUrl!,
+        };
+      });
+  } catch (error) {
+    console.error("Instagram feed lookup failed; using bundled posts.", error);
+    return [];
   }
 }
