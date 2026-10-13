@@ -5,6 +5,9 @@ import { PoweredBy } from "@/components/powered-by";
 import { SiteHeader } from "@/components/site-header";
 import { getMenu } from "@/lib/content";
 
+// Owner menu edits must appear without a rebuild; see the note in app/page.tsx.
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Мени",
   description: "Целото мени на Bla Bla Cafe, Струмица: кафе, сокови, пиво, коктели и аперитиви.",

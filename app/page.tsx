@@ -8,6 +8,11 @@ import { SiteHeader } from "@/components/site-header";
 import { socialPosts } from "@/data/menu";
 import { getFeedPosts, getMenu } from "@/lib/content";
 
+// Rendered per request: the Instagram feed and menu live in Postgres, and the Docker
+// builder stage has no database (`.env` is in `.dockerignore`, only NEXT_PUBLIC_SITE_URL
+// is passed), so prerendering froze the seed/fallback markup into the HTML for good.
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const [{ items }, feedPosts] = await Promise.all([getMenu(), getFeedPosts()]);
   const featured = items.filter((item) => item.featured && item.available).slice(0, 4);
