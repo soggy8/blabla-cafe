@@ -101,27 +101,31 @@ export default async function Home() {
               Следи нè <ArrowUpRight size={16} />
             </a>
           </div>
-          <div className="social-grid">
-            {feedPosts.length >= 3
-              ? feedPosts.map((post, index) => (
-                  <a className="social-card social-photo" href={post.href} target="_blank" rel="noreferrer" key={post.id}>
-                    <Image src={post.image} alt={post.title || "Објава од Instagram"} fill sizes="(max-width: 900px) 100vw, 33vw" />
-                    <span className="social-date">{post.date}</span>
-                    {post.title && <h3>{post.title}</h3>}
-                    <span className="social-arrow"><ArrowUpRight /></span>
-                    <span className="social-index">0{index + 1}</span>
+          {feedPosts.length >= 3 ? (
+            <ul className="feed-list">
+              {feedPosts.map((post) => (
+                <li key={post.id}>
+                  <a href={post.href} target="_blank" rel="noreferrer">
+                    <time>{post.date}</time>
+                    <h3>{post.title}</h3>
+                    <ArrowUpRight />
                   </a>
-                ))
-              : socialPosts.map((post, index) => (
-              <a className={`social-card social-${post.kind}`} href={post.href} target="_blank" rel="noreferrer" key={post.id}>
-                <span className="social-date">{post.date}</span>
-                <span className="social-shape" aria-hidden="true" />
-                <h3>{post.title}</h3>
-                <span className="social-arrow"><ArrowUpRight /></span>
-                <span className="social-index">0{index + 1}</span>
-              </a>
-            ))}
-          </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="social-grid">
+              {socialPosts.map((post, index) => (
+                <a className={`social-card social-${post.kind}`} href={post.href} target="_blank" rel="noreferrer" key={post.id}>
+                  <span className="social-date">{post.date}</span>
+                  <span className="social-shape" aria-hidden="true" />
+                  <h3>{post.title}</h3>
+                  <span className="social-arrow"><ArrowUpRight /></span>
+                  <span className="social-index">0{index + 1}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="visit-section" id="visit">

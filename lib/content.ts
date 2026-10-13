@@ -59,7 +59,6 @@ export type FeedPost = {
   title: string;
   date: string;
   href: string;
-  image: string;
 };
 
 const feedDate = new Intl.DateTimeFormat("mk-MK", { day: "numeric", month: "long" });
@@ -75,19 +74,18 @@ export async function getFeedPosts(limit = 3): Promise<FeedPost[]> {
       .limit(12);
 
     return rows
-      .filter((row) => row.mediaUrl)
-      .slice(0, limit)
       .map((row) => {
         const firstLine = row.caption?.split("\n")[0]?.trim() ?? "";
         return {
           id: row.id,
           title:
-            firstLine.length > 60 ? `${firstLine.slice(0, 57).trimEnd()}…` : firstLine,
+            firstLine.length > 80 ? `${firstLine.slice(0, 77).trimEnd()}…` : firstLine,
           date: feedDate.format(row.publishedAt),
           href: row.permalink,
-          image: row.mediaUrl!,
         };
-      });
+      })
+      .filter((post) => post.title)
+      .slice(0, limit);
   } catch (error) {
     console.error("Instagram feed lookup failed; using bundled posts.", error);
     return [];
