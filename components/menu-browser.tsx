@@ -14,6 +14,7 @@ export function MenuBrowser({
   const [active, setActive] = useState("all");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [highlight, setHighlight] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +43,39 @@ export function MenuBrowser({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
+
+  // Deep link from a homepage feature card: /menu#item-<slug> scrolls that row into view
+  // and flashes it, compensating for the sticky .menu-tools bar.
+  useEffect(() => {
+    const focusHash = () => {
+      const id = window.location.hash.replace(/^#/, "");
+      const node = id ? document.getElementById(id) : null;
+      if (!node) {
+        setHighlight(null);
+        return undefined;
+      }
+      const sticky = filterRef.current?.closest(".menu-tools")?.getBoundingClientRect().height ?? 0;
+      window.requestAnimationFrame(() => {
+        window.scrollTo({
+          top: window.scrollY + node.getBoundingClientRect().top - (sticky + 16),
+          behavior: "smooth",
+        });
+      });
+      setHighlight(id);
+      return window.setTimeout(() => setHighlight(null), 2600);
+    };
+
+    let timer = focusHash();
+    const onHashChange = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = focusHash();
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, []);
 
   const choose = (categoryId: string) => {
     setActive(categoryId);
@@ -153,7 +187,11 @@ export function MenuBrowser({
               {category.eyebrow ? <span>{category.eyebrow}</span> : null}
             </header>
             {groupItems.map((item, index) => (
-              <article className="menu-row" key={item.id}>
+              <article
+                className={`menu-row${highlight === `item-${item.slug ?? item.id}` ? " is-target" : ""}`}
+                id={`item-${item.slug ?? item.id}`}
+                key={item.id}
+              >
                 <span className="menu-index">{String(index + 1).padStart(2, "0")}</span>
                 <div>
                   <div className="menu-name-line">

@@ -14,6 +14,8 @@ import { getFeedPosts, getMenu } from "@/lib/content";
 export const dynamic = "force-dynamic";
 
 function FeatureCard({ item, index }: { item: MenuItem; index: number }) {
+  // A card opens that item inside the menu; the matching row carries the anchor id.
+  const anchor = `item-${item.slug ?? item.id}`;
   return (
     <article className={`feature-card feature-${index + 1}`}>
       <div className="feature-visual">
@@ -36,7 +38,11 @@ function FeatureCard({ item, index }: { item: MenuItem; index: number }) {
       <div className="feature-copy">
         <div>
           {item.badge ? <span className="menu-badge">{item.badge}</span> : null}
-          <h3>{item.name}</h3>
+          <h3>
+            <Link className="feature-link" href={`/menu#${anchor}`}>
+              {item.name}
+            </Link>
+          </h3>
           <p>{item.description}</p>
         </div>
         <strong>{item.price ? `${item.price} ден.` : "Дознај повеќе"}</strong>

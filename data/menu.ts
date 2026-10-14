@@ -8,6 +8,8 @@ export type MenuCategory = {
 
 export type MenuItem = {
   id: string;
+  /** Database slug (equals `id` for the bundled seed data); used for the menu anchors. */
+  slug?: string;
   categoryId: string;
   name: string;
   description: string;

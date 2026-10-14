@@ -39,6 +39,7 @@ export async function getMenu(): Promise<{
       })),
       items: itemRows.map((item) => ({
         id: item.id,
+        slug: item.slug,
         categoryId: item.categoryId,
         name: item.name,
         description: item.description,
