@@ -5,7 +5,7 @@ import { HeroMotion } from "@/components/hero-motion";
 import { PoweredBy } from "@/components/powered-by";
 import { RitualVideo } from "@/components/ritual-video";
 import { SiteHeader } from "@/components/site-header";
-import { socialPosts } from "@/data/menu";
+import { socialPosts, type MenuItem } from "@/data/menu";
 import { getFeedPosts, getMenu } from "@/lib/content";
 
 // Rendered per request: the Instagram feed and menu live in Postgres, and the Docker
@@ -13,9 +13,48 @@ import { getFeedPosts, getMenu } from "@/lib/content";
 // is passed), so prerendering froze the seed/fallback markup into the HTML for good.
 export const dynamic = "force-dynamic";
 
+function FeatureCard({ item, index }: { item: MenuItem; index: number }) {
+  return (
+    <article className={`feature-card feature-${index + 1}`}>
+      <div className="feature-visual">
+        {item.image ? (
+          <Image
+            className="feature-photo"
+            src={item.image}
+            alt={item.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 25vw"
+          />
+        ) : (
+          <>
+            <span className="feature-glow" aria-hidden="true" />
+            <span className="feature-vessel" aria-hidden="true" />
+          </>
+        )}
+        <span className="feature-number" aria-hidden="true">0{index + 1}</span>
+      </div>
+      <div className="feature-copy">
+        <div>
+          {item.badge ? <span className="menu-badge">{item.badge}</span> : null}
+          <h3>{item.name}</h3>
+          <p>{item.description}</p>
+        </div>
+        <strong>{item.price ? `${item.price} ден.` : "Дознај повеќе"}</strong>
+      </div>
+    </article>
+  );
+}
+
 export default async function Home() {
-  const [{ items }, feedPosts] = await Promise.all([getMenu(), getFeedPosts()]);
-  const featured = items.filter((item) => item.featured && item.available).slice(0, 4);
+  const [{ categories, items }, feedPosts] = await Promise.all([getMenu(), getFeedPosts()]);
+  const foodCategories = new Set(
+    categories
+      .filter((category) => ["toasts", "cakes"].includes(category.slug ?? category.id))
+      .map((category) => category.id),
+  );
+  const featuredItems = items.filter((item) => item.featured && item.available);
+  const featured = featuredItems.filter((item) => !foodCategories.has(item.categoryId)).slice(0, 4);
+  const featuredFood = featuredItems.filter((item) => foodCategories.has(item.categoryId)).slice(0, 4);
 
   return (
     <>
@@ -50,36 +89,29 @@ export default async function Home() {
           </div>
           <div className="featured-grid section-shell">
             {featured.map((item, index) => (
-              <article className={`feature-card feature-${index + 1}`} key={item.id}>
-                <div className="feature-visual">
-                  {item.image ? (
-                    <Image
-                      className="feature-photo"
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 25vw"
-                    />
-                  ) : (
-                    <>
-                      <span className="feature-glow" aria-hidden="true" />
-                      <span className="feature-vessel" aria-hidden="true" />
-                    </>
-                  )}
-                  <span className="feature-number" aria-hidden="true">0{index + 1}</span>
-                </div>
-                <div className="feature-copy">
-                  <div>
-                    {item.badge ? <span className="menu-badge">{item.badge}</span> : null}
-                    <h3>{item.name}</h3>
-                    <p>{item.description}</p>
-                  </div>
-                  <strong>{item.price ? `${item.price} ден.` : "Дознај повеќе"}</strong>
-                </div>
-              </article>
+              <FeatureCard item={item} index={index} key={item.id} />
             ))}
           </div>
         </section>
+
+        {featuredFood.length ? (
+          <section className="featured-section featured-food">
+            <div className="section-heading section-shell">
+              <div>
+                <p className="eyebrow">Топло и слатко</p>
+                <h2>Нешто за <em>јадење.</em></h2>
+              </div>
+              <Link href="/menu" className="circle-link" aria-label="Целото мени">
+                <ArrowUpRight />
+              </Link>
+            </div>
+            <div className="featured-grid featured-food-grid section-shell">
+              {featuredFood.map((item, index) => (
+                <FeatureCard item={item} index={index} key={item.id} />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="ritual-section">
           <RitualVideo />

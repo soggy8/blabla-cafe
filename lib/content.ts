@@ -33,6 +33,7 @@ export async function getMenu(): Promise<{
       categories: categoryRows.map((category) => ({
         id: category.id,
         name: category.name,
+        slug: category.slug,
         eyebrow: category.eyebrow,
         order: category.sortOrder,
       })),

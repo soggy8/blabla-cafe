@@ -1,5 +1,6 @@
 export type MenuCategory = {
   id: string;
+  slug?: string;
   name: string;
   eyebrow: string;
   order: number;
@@ -31,9 +32,11 @@ export const menuCategories: MenuCategory[] = [
   { id: "wine", name: "Вино", eyebrow: "0,18 л", order: 11 },
   { id: "soft-drinks", name: "Свежи напитоци", eyebrow: "Разладување", order: 12 },
   { id: "aperitifs", name: "Аперитиви", eyebrow: "Пред или после", order: 13 },
+  { id: "toasts", name: "Тостови", eyebrow: "Топло и вкусно", order: 14 },
+  { id: "cakes", name: "Торти", eyebrow: "Слатко задоволство", order: 15 },
 ];
 
-type Row = [id: string, name: string, price: number, description?: string, extra?: Partial<MenuItem>];
+type Row = [id: string, name: string, price: number | undefined, description?: string, extra?: Partial<MenuItem>];
 
 const group = (categoryId: string, rows: Row[]): MenuItem[] =>
   rows.map(([id, name, price, description = "", extra]) => ({
@@ -101,6 +104,15 @@ export const menuItems: MenuItem[] = [
     ["fanta", "Fanta", 90],
     ["schweppes-bitter-lemon", "Schweppes Bitter Lemon", 100],
     ["schweppes-tonic", "Schweppes Tonic", 100],
+  ]),
+  ...group("toasts", [
+    ["toast", "Тост", 60, "Шунка и кашкавал. Мал 60 ден., голем 90 ден.", { featured: true, image: "/media/featured-toast-ham-cheese.webp" }],
+  ]),
+  ...group("cakes", [
+    ["cheesecake-raspberry", "Cheesecake Малина", undefined, "Кремаст, свеж и неодолив.", { featured: true, image: "/media/featured-cheesecake.webp" }],
+    ["cheesecake-nutella", "Cheesecake Nutella", undefined, "За сите љубители на чоколадо и Nutella.", { featured: true, image: "/media/featured-chocolate-cake.webp" }],
+    ["tiramisu", "Tiramisu", undefined, "Класичен вкус со совршена кремастост.", { featured: true, image: "/media/featured-tiramisu.webp" }],
+    ["snickers", "Snickers", undefined, "Чоколадо, карамела, кикирики и крем."],
   ]),
   ...group("beer", [
     ["amstel", "Amstel", 130],

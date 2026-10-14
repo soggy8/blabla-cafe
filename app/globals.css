@@ -127,6 +127,7 @@ body:has(.menu-page, .not-found-page) .brand-mark, body:has(.menu-page, .not-fou
 .circle-link { display: grid; width: 62px; height: 62px; place-items: center; border: 1px solid var(--ink); border-radius: 50%; transition: .25s ease; }
 .circle-link:hover { background: var(--ink); color: var(--cream); transform: rotate(8deg); }
 .featured-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.featured-food { padding-top: 0; }
 .feature-card { min-height: 500px; overflow: hidden; background: var(--paper); }
 .feature-card:nth-child(even) { margin-top: 54px; }
 .feature-visual { position: relative; display: grid; height: 300px; place-items: center; overflow: hidden; background: #39231a; }
