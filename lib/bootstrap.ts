@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { hash } from "@node-rs/argon2";
 import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
 import { menuCategories as seedCategories, menuItems as seedItems } from "@/data/menu";
+import { promotionSeeds } from "@/data/promotions";
 import * as schema from "@/db/schema";
 
 // Structural type so both postgres-js (production) and PGlite (tests) fit.
@@ -36,6 +37,23 @@ export async function seedMenuIfEmpty(db: BootstrapDb) {
     });
   }
   return true;
+}
+
+// Seeds the placeholder promotions exactly once, so deleting them all in the
+// admin panel does not bring them back on the next restart.
+export async function seedPromotionsOnce(db: BootstrapDb) {
+  const flag = "promotions_seeded";
+  const [seeded] = await db
+    .select()
+    .from(schema.siteSettings)
+    .where(eq(schema.siteSettings.key, flag))
+    .limit(1);
+  if (seeded) return false;
+
+  const existing = await db.select().from(schema.promotions).limit(1);
+  if (!existing.length) await db.insert(schema.promotions).values(promotionSeeds);
+  await db.insert(schema.siteSettings).values({ key: flag, value: true });
+  return !existing.length;
 }
 
 export type OwnerResult = "created" | "reset" | "exists" | "skipped";

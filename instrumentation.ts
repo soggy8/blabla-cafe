@@ -7,13 +7,14 @@ export async function register() {
     const path = await import("node:path");
     const { migrate } = await import("drizzle-orm/postgres-js/migrator");
     const { getDb } = await import("./db/client");
-    const { ensureOwner, seedMenuIfEmpty } = await import("./lib/bootstrap");
+    const { ensureOwner, seedMenuIfEmpty, seedPromotionsOnce } = await import("./lib/bootstrap");
     const db = getDb();
     await migrate(db, {
       migrationsFolder: path.resolve("db/migrations"),
     });
 
     if (await seedMenuIfEmpty(db)) console.log("Menu seeded.");
+    if (await seedPromotionsOnce(db)) console.log("Placeholder promotions seeded.");
 
     const owner = await ensureOwner(db, {
       email: process.env.ADMIN_EMAIL,

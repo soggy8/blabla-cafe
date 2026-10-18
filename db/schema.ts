@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   integer,
   jsonb,
   pgTable,
@@ -93,6 +94,22 @@ export const socialPosts = pgTable(
   (table) => [uniqueIndex("social_posts_external_id_idx").on(table.externalId)],
 );
 
+export const promotions = pgTable("promotions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  // Free text shown as a pill, e.g. "Секој ден до 15:00".
+  validity: text("validity").default("").notNull(),
+  // One offer per line; "Фреш + еспресо – 160 ден." renders as name and price.
+  description: text("description").default("").notNull(),
+  // Last day the promotion is shown (inclusive, Skopje time); null = until hidden.
+  endsOn: date("ends_on"),
+  imagePath: text("image_path"),
+  link: text("link"),
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export const siteSettings = pgTable("site_settings", {
   key: text("key").primaryKey(),
   value: jsonb("value").notNull(),
@@ -101,3 +118,4 @@ export const siteSettings = pgTable("site_settings", {
 
 export type MenuCategoryRecord = typeof menuCategories.$inferSelect;
 export type MenuItemRecord = typeof menuItems.$inferSelect;
+export type PromotionRecord = typeof promotions.$inferSelect;

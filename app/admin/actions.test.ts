@@ -5,7 +5,7 @@ import path from "node:path";
 import sharp from "sharp";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { hash } from "@node-rs/argon2";
-import { menuCategories, menuItems, owners } from "@/db/schema";
+import { menuCategories, menuItems, owners, promotions, socialPosts } from "@/db/schema";
 import { seedMenuIfEmpty } from "@/lib/bootstrap";
 import { createTestDb } from "@/tests/support/db";
 import { state } from "@/tests/support/mocks";
@@ -59,6 +59,12 @@ describe("authorization", () => {
     await expect(actions.saveMenuItemAction(form({ categoryId: category.id, name: "Hack", sortOrder: "0" }))).rejects.toThrow("Unauthorized");
     await expect(actions.deleteMenuItemAction(form({ id: item.id }))).rejects.toThrow("Unauthorized");
     await expect(actions.saveCategoryAction(form({ name: "Hack", sortOrder: "0" }))).rejects.toThrow("Unauthorized");
+    await expect(actions.setFeaturedAction(form({ id: item.id, featured: "true" }))).rejects.toThrow("Unauthorized");
+    await expect(actions.savePromotionAction(form({ title: "Hack" }))).rejects.toThrow("Unauthorized");
+    await expect(actions.setPromotionActiveAction(form({ id: item.id, active: "true" }))).rejects.toThrow("Unauthorized");
+    await expect(actions.deletePromotionAction(form({ id: item.id }))).rejects.toThrow("Unauthorized");
+    await expect(actions.importInstagramPromotionAction(form({ postId: item.id }))).rejects.toThrow("Unauthorized");
+
     expect(await state.db!.select().from(menuItems)).toHaveLength(before.length);
   });
 });
@@ -173,6 +179,72 @@ describe("category actions", () => {
 
   it("rejects a too-short name", async () => {
     await expect(actions.saveCategoryAction(form({ name: "x", sortOrder: "0" }))).rejects.toThrow();
+  });
+});
+
+describe("featured items", () => {
+  beforeEach(login);
+
+  it("adds and removes an item from the homepage", async () => {
+    const [item] = await state.db!.select().from(menuItems).where(eq(menuItems.featured, false)).limit(1);
+    await actions.setFeaturedAction(form({ id: item.id, featured: "true" }));
+    expect((await state.db!.select().from(menuItems).where(eq(menuItems.id, item.id)))[0].featured).toBe(true);
+    await actions.setFeaturedAction(form({ id: item.id, featured: "false" }));
+    expect((await state.db!.select().from(menuItems).where(eq(menuItems.id, item.id)))[0].featured).toBe(false);
+  });
+});
+
+describe("promotion actions", () => {
+  beforeEach(login);
+
+  it("creates, edits, hides and deletes a promotion", async () => {
+    await actions.savePromotionAction(
+      form({ title: "Утринска", validity: "До 15:00", description: "Фреш + еспресо – 160 ден.", endsOn: "2026-12-31", link: "", active: "on" }),
+    );
+    const [created] = await state.db!.select().from(promotions);
+    expect(created).toMatchObject({ title: "Утринска", endsOn: "2026-12-31", link: null, active: true });
+
+    await actions.savePromotionAction(form({ id: created.id, title: "Утринска промоција", endsOn: "" }));
+    const [edited] = await state.db!.select().from(promotions);
+    expect(edited).toMatchObject({ title: "Утринска промоција", endsOn: null, active: false });
+
+    await actions.setPromotionActiveAction(form({ id: created.id, active: "true" }));
+    expect((await state.db!.select().from(promotions))[0].active).toBe(true);
+
+    await actions.deletePromotionAction(form({ id: created.id }));
+    expect(await state.db!.select().from(promotions)).toHaveLength(0);
+  });
+
+  it("rejects bad dates and non-https links", async () => {
+    await expect(actions.savePromotionAction(form({ title: "Valid", endsOn: "31.12.2026" }))).rejects.toThrow();
+    await expect(actions.savePromotionAction(form({ title: "Valid", link: "javascript:alert(1)" }))).rejects.toThrow();
+    await expect(actions.savePromotionAction(form({ title: "Valid", link: "http://example.com" }))).rejects.toThrow();
+    expect(await state.db!.select().from(promotions)).toHaveLength(0);
+  });
+
+  it("imports an Instagram post once, as a hidden draft", async () => {
+    const [post] = await state.db!
+      .insert(socialPosts)
+      .values({
+        externalId: "1",
+        mediaType: "IMAGE",
+        caption: "☕ УТРИНСКА ПРОМОЦИЈА! ☕\n🍊 Фреш + Еспресо – 160 ден.\n⏰ Промоцијата важи секој ден до 15:00 часот.",
+        permalink: "https://www.instagram.com/p/abc/",
+        publishedAt: new Date(),
+      })
+      .returning();
+
+    await actions.importInstagramPromotionAction(form({ postId: post.id }));
+    await actions.importInstagramPromotionAction(form({ postId: post.id }));
+    const rows = await state.db!.select().from(promotions);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      title: "Утринска промоција",
+      validity: "Секој ден до 15:00",
+      description: "Фреш + Еспресо – 160 ден.",
+      link: "https://www.instagram.com/p/abc/",
+      active: false,
+    });
   });
 });
 

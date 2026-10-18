@@ -1,12 +1,14 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNull, or } from "drizzle-orm";
 import {
   menuCategories as seedCategories,
   menuItems as seedItems,
   type MenuCategory,
   type MenuItem,
 } from "@/data/menu";
+import { promotionSeeds } from "@/data/promotions";
 import { getDb, hasDatabase } from "@/db/client";
-import { menuCategories, menuItems, socialPosts } from "@/db/schema";
+import { menuCategories, menuItems, promotions, socialPosts } from "@/db/schema";
+import { parseOfferLines, todayInSkopje, type OfferLine } from "@/lib/promotions";
 
 export async function getMenu(): Promise<{
   categories: MenuCategory[];
@@ -90,6 +92,54 @@ export async function getFeedPosts(limit = 3): Promise<FeedPost[]> {
       .slice(0, limit);
   } catch (error) {
     console.error("Instagram feed lookup failed; using bundled posts.", error);
+    return [];
+  }
+}
+
+export type PublicPromotion = {
+  id: string;
+  title: string;
+  validity: string;
+  offers: OfferLine[];
+  image?: string;
+  link?: string;
+};
+
+const fallbackPromotions: PublicPromotion[] = promotionSeeds
+  .filter((promotion) => promotion.active)
+  .map((promotion, index) => ({
+    id: `seed-${index}`,
+    title: promotion.title,
+    validity: promotion.validity,
+    offers: parseOfferLines(promotion.description),
+    link: promotion.link,
+  }));
+
+export async function getPromotions(): Promise<PublicPromotion[]> {
+  if (!hasDatabase()) return fallbackPromotions;
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(promotions)
+      .where(
+        and(
+          eq(promotions.active, true),
+          or(isNull(promotions.endsOn), gte(promotions.endsOn, todayInSkopje())),
+        ),
+      )
+      .orderBy(desc(promotions.createdAt));
+
+    return rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      validity: row.validity,
+      offers: parseOfferLines(row.description),
+      image: row.imagePath ?? undefined,
+      link: row.link ?? undefined,
+    }));
+  } catch (error) {
+    console.error("Promotions lookup failed; hiding the section.", error);
     return [];
   }
 }

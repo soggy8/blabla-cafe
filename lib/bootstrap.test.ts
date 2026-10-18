@@ -2,9 +2,10 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { verify } from "@node-rs/argon2";
 import { menuCategories as seedCategories, menuItems as seedItems } from "@/data/menu";
-import { menuCategories, menuItems, owners, sessions } from "@/db/schema";
+import { promotionSeeds } from "@/data/promotions";
+import { menuCategories, menuItems, owners, promotions, sessions } from "@/db/schema";
 import { createTestDb, type TestDb } from "@/tests/support/db";
-import { ensureOwner, seedMenuIfEmpty } from "./bootstrap";
+import { ensureOwner, seedMenuIfEmpty, seedPromotionsOnce } from "./bootstrap";
 
 let db: TestDb;
 beforeEach(async () => {
@@ -26,6 +27,16 @@ describe("seedMenuIfEmpty", () => {
     await seedMenuIfEmpty(db);
     const [row] = await db.select().from(menuItems).where(eq(menuItems.slug, seedItems[0].id));
     expect(row.price).toBe(999);
+  });
+});
+
+describe("seedPromotionsOnce", () => {
+  it("seeds the placeholders once and never brings deleted ones back", async () => {
+    expect(await seedPromotionsOnce(db)).toBe(true);
+    expect(await db.select().from(promotions)).toHaveLength(promotionSeeds.length);
+    await db.delete(promotions);
+    expect(await seedPromotionsOnce(db)).toBe(false);
+    expect(await db.select().from(promotions)).toHaveLength(0);
   });
 });
 

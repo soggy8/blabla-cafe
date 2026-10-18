@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ImageIcon } from "lucide-react";
 import type { MenuItemRecord } from "@/db/schema";
 import { deleteMenuItemAction, saveMenuItemAction } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 export type EditableItem = Pick<
   MenuItemRecord,
@@ -98,7 +99,14 @@ export function ItemEditor({
       <MenuItemForm categories={categories} item={item} />
       <form action={deleteMenuItemAction}>
         <input type="hidden" name="id" value={item.id} />
-        <button className="danger-link">Избриши производ</button>
+        <button
+          className="danger-link"
+          onClick={(event) => {
+            if (!confirm(`Да се избрише „${item.name}“?`)) event.preventDefault();
+          }}
+        >
+          Избриши производ
+        </button>
       </form>
     </LazyDetails>
   );
@@ -193,7 +201,7 @@ export function MenuItemForm({
             type="checkbox"
             defaultChecked={item?.featured}
           />
-          Истакнат производ
+          Истакнат на почетна
         </label>
         <label>
           <input
@@ -204,9 +212,7 @@ export function MenuItemForm({
           Достапен
         </label>
       </div>
-      <button className="button button-solid" type="submit">
-        Зачувај
-      </button>
+      <SubmitButton>Зачувај</SubmitButton>
     </form>
   );
 }

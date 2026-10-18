@@ -12,10 +12,11 @@ import {
   logoutOwner,
 } from "@/lib/auth";
 import { clientIp } from "@/lib/client-ip";
+import { promotionFromCaption } from "@/lib/promotions";
 import { slugify } from "@/lib/slug";
 import { deleteImageUpload, saveImageUpload } from "@/lib/uploads";
 import { getDb } from "@/db/client";
-import { menuCategories, menuItems } from "@/db/schema";
+import { menuCategories, menuItems, promotions, socialPosts } from "@/db/schema";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -66,6 +67,17 @@ const categorySchema = z.object({
   eyebrow: z.string().trim().max(60).default(""),
   sortOrder: z.coerce.number().int().min(0).max(999),
   active: z.boolean(),
+});
+
+const promotionSchema = z.object({
+  id: z.string().uuid().optional(),
+  title: z.string().trim().min(2).max(100),
+  validity: z.string().trim().max(80).default(""),
+  description: z.string().trim().max(600).default(""),
+  endsOn: z.union([z.literal(""), z.iso.date()]).default(""),
+  link: z.union([z.literal(""), z.string().trim().url().startsWith("https://")]).default(""),
+  active: z.boolean(),
+  removeImage: z.boolean(),
 });
 
 export async function loginAction(
@@ -209,6 +221,111 @@ export async function saveCategoryAction(formData: FormData) {
     });
   }
 
+  revalidateMenu();
+}
+
+export async function setFeaturedAction(formData: FormData) {
+  await requireOwner();
+  const id = z.string().uuid().parse(formData.get("id"));
+  await getDb()
+    .update(menuItems)
+    .set({ featured: formData.get("featured") === "true", updatedAt: new Date() })
+    .where(eq(menuItems.id, id));
+  revalidateMenu();
+}
+
+export async function savePromotionAction(formData: FormData) {
+  await requireOwner();
+
+  const parsed = promotionSchema.safeParse({
+    ...Object.fromEntries(formData),
+    active: formData.get("active") === "on",
+    removeImage: formData.get("removeImage") === "on",
+  });
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Invalid promotion");
+  }
+
+  const { id, endsOn, link, removeImage, ...values } = parsed.data;
+  const db = getDb();
+  const [existing] = id
+    ? await db
+        .select({ imagePath: promotions.imagePath })
+        .from(promotions)
+        .where(eq(promotions.id, id))
+    : [];
+
+  let imagePath = existing?.imagePath ?? null;
+  const image = formData.get("image");
+  if (image instanceof File && image.size > 0) {
+    const upload = await saveImageUpload(image);
+    if (!upload.ok) throw new Error(upload.error);
+    imagePath = upload.path;
+  } else if (removeImage) {
+    imagePath = null;
+  }
+
+  const record = {
+    ...values,
+    endsOn: endsOn || null,
+    link: link || null,
+    imagePath,
+    updatedAt: new Date(),
+  };
+
+  if (id) {
+    await db.update(promotions).set(record).where(eq(promotions.id, id));
+  } else {
+    await db.insert(promotions).values(record);
+  }
+
+  if (existing?.imagePath && existing.imagePath !== imagePath) {
+    await deleteImageUpload(existing.imagePath);
+  }
+
+  revalidateMenu();
+}
+
+export async function setPromotionActiveAction(formData: FormData) {
+  await requireOwner();
+  const id = z.string().uuid().parse(formData.get("id"));
+  await getDb()
+    .update(promotions)
+    .set({ active: formData.get("active") === "true", updatedAt: new Date() })
+    .where(eq(promotions.id, id));
+  revalidateMenu();
+}
+
+export async function deletePromotionAction(formData: FormData) {
+  await requireOwner();
+  const id = z.string().uuid().parse(formData.get("id"));
+  const [deleted] = await getDb()
+    .delete(promotions)
+    .where(eq(promotions.id, id))
+    .returning({ imagePath: promotions.imagePath });
+  await deleteImageUpload(deleted?.imagePath);
+  revalidateMenu();
+}
+
+// Creates a hidden draft from an Instagram post; the owner checks it and shows it.
+export async function importInstagramPromotionAction(formData: FormData) {
+  await requireOwner();
+  const id = z.string().uuid().parse(formData.get("postId"));
+  const db = getDb();
+  const [post] = await db.select().from(socialPosts).where(eq(socialPosts.id, id));
+  if (!post?.caption) throw new Error("Instagram post not found");
+
+  const [already] = await db
+    .select({ id: promotions.id })
+    .from(promotions)
+    .where(eq(promotions.link, post.permalink));
+  if (!already) {
+    await db.insert(promotions).values({
+      ...promotionFromCaption(post.caption),
+      link: post.permalink,
+      active: false,
+    });
+  }
   revalidateMenu();
 }
 

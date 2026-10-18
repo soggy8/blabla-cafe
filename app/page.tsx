@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Camera, Clock3, MapPin, Phone, Sparkles } from "lucide-react";
+import { ArrowUpRight, Camera, Clock3, MapPin, Phone, Sparkles, Tag } from "lucide-react";
 import { HeroMotion } from "@/components/hero-motion";
 import { PoweredBy } from "@/components/powered-by";
 import { RitualVideo } from "@/components/ritual-video";
 import { SiteHeader } from "@/components/site-header";
 import { socialPosts, type MenuItem } from "@/data/menu";
-import { getFeedPosts, getMenu } from "@/lib/content";
+import { getFeedPosts, getMenu, getPromotions, type PublicPromotion } from "@/lib/content";
+import { isFoodCategory, splitFeatured } from "@/lib/featured";
 
 // Rendered per request: the Instagram feed and menu live in Postgres, and the Docker
 // builder stage has no database (`.env` is in `.dockerignore`, only NEXT_PUBLIC_SITE_URL
@@ -51,16 +52,60 @@ function FeatureCard({ item, index }: { item: MenuItem; index: number }) {
   );
 }
 
+function PromotionCard({ promotion }: { promotion: PublicPromotion }) {
+  return (
+    <article className="promo-card">
+      {promotion.image ? (
+        <div className="promo-visual">
+          <Image
+            src={promotion.image}
+            alt={promotion.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 980px) 50vw, 33vw"
+          />
+        </div>
+      ) : null}
+      <div className="promo-body">
+        {promotion.validity ? (
+          <span className="promo-when"><Clock3 size={13} /> {promotion.validity}</span>
+        ) : null}
+        <h3>{promotion.title}</h3>
+        {promotion.offers.length ? (
+          <ul className="promo-offers">
+            {promotion.offers.map((offer, index) => (
+              <li key={index}>
+                <span>{offer.label}</span>
+                {offer.price ? <strong>{offer.price}</strong> : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {promotion.link ? (
+          <a className="text-link" href={promotion.link} target="_blank" rel="noreferrer">
+            Види на Instagram <ArrowUpRight size={15} />
+          </a>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
 export default async function Home() {
-  const [{ categories, items }, feedPosts] = await Promise.all([getMenu(), getFeedPosts()]);
+  const [{ categories, items }, feedPosts, promotions] = await Promise.all([
+    getMenu(),
+    getFeedPosts(),
+    getPromotions(),
+  ]);
   const foodCategories = new Set(
     categories
-      .filter((category) => ["toasts", "cakes"].includes(category.slug ?? category.id))
+      .filter((category) => isFoodCategory(category.slug ?? category.id))
       .map((category) => category.id),
   );
-  const featuredItems = items.filter((item) => item.featured && item.available);
-  const featured = featuredItems.filter((item) => !foodCategories.has(item.categoryId)).slice(0, 4);
-  const featuredFood = featuredItems.filter((item) => foodCategories.has(item.categoryId)).slice(0, 4);
+  const visibleCategories = new Set(categories.map((category) => category.id));
+  const { drinks: featured, food: featuredFood } = splitFeatured(
+    items.filter((item) => visibleCategories.has(item.categoryId)),
+    (item) => foodCategories.has(item.categoryId),
+  );
 
   return (
     <>
@@ -83,25 +128,43 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="featured-section">
-          <div className="section-heading section-shell">
-            <div>
-              <p className="eyebrow">Избрано од барот</p>
-              <h2>Неколку добри <em>причини.</em></h2>
+        {promotions.length ? (
+          <section className="promo-section" id="promo">
+            <div className="section-heading section-shell">
+              <div>
+                <p className="eyebrow"><Tag size={14} /> Промоции</p>
+                <h2>Овие денови <em>во Bla Bla.</em></h2>
+              </div>
             </div>
-            <Link href="/menu" className="circle-link" aria-label="Целото мени">
-              <ArrowUpRight />
-            </Link>
-          </div>
-          <div className="featured-grid section-shell">
-            {featured.map((item, index) => (
-              <FeatureCard item={item} index={index} key={item.id} />
-            ))}
-          </div>
-        </section>
+            <div className={`promo-grid section-shell promo-count-${Math.min(promotions.length, 3)}`}>
+              {promotions.map((promotion) => (
+                <PromotionCard promotion={promotion} key={promotion.id} />
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {featured.length ? (
+          <section className="featured-section">
+            <div className="section-heading section-shell">
+              <div>
+                <p className="eyebrow">Избрано од барот</p>
+                <h2>Неколку добри <em>причини.</em></h2>
+              </div>
+              <Link href="/menu" className="circle-link" aria-label="Целото мени">
+                <ArrowUpRight />
+              </Link>
+            </div>
+            <div className="featured-grid section-shell">
+              {featured.map((item, index) => (
+                <FeatureCard item={item} index={index} key={item.id} />
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {featuredFood.length ? (
-          <section className="featured-section featured-food">
+          <section className={featured.length ? "featured-section featured-food" : "featured-section"}>
             <div className="section-heading section-shell">
               <div>
                 <p className="eyebrow">Топло и слатко</p>

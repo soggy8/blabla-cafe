@@ -20,6 +20,7 @@ Work through this with the client. Tick each item when done.
 - [ ] `https://DOMAIN/api/health` returns `{"ok":true,"database":true}`.
 - [ ] Owner logs in and **changes the initial password**; after that `ADMIN_PASSWORD` in `.env` is ignored (it only seeds the first owner), so replace it with a random value rather than leaving the old password in the file.
 - [ ] Menu, prices, phone, address and opening hours are verified by the client (see "Business details" below).
+- [ ] Placeholder promotions (seeded once from Instagram posts of Aug–Sep 2026: morning combo, school offer, weekend beer + board — the last one hidden) are confirmed, edited or removed by the client under **Промоции**.
 
 ## Monitoring
 

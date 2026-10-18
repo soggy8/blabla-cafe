@@ -3,6 +3,7 @@ import "dotenv/config";
 import { hash } from "@node-rs/argon2";
 import { eq, inArray } from "drizzle-orm";
 import { menuCategories as seedCategories, menuItems as seedItems } from "../data/menu";
+import { seedPromotionsOnce } from "../lib/bootstrap";
 import { getDb } from "./client";
 import {
   menuCategories,
@@ -92,6 +93,8 @@ async function main() {
       target: siteSettings.key,
       set: { updatedAt: new Date() },
     });
+
+  if (await seedPromotionsOnce(db)) console.log("Placeholder promotions seeded.");
 
   if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
     const email = process.env.ADMIN_EMAIL.trim().toLowerCase();
