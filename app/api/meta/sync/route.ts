@@ -1,15 +1,23 @@
 import { revalidatePath } from "next/cache";
-import { syncInstagramPosts } from "@/lib/meta/instagram";
+import { timingSafeEqual } from "node:crypto";
+import { isMetaConfigured, syncInstagramPosts } from "@/lib/meta/instagram";
 
 export const runtime = "nodejs";
 
+function authorized(request: Request) {
+  const expected = process.env.CRON_SECRET;
+  if (!expected) return false;
+  const given = Buffer.from(request.headers.get("authorization") ?? "");
+  const wanted = Buffer.from(`Bearer ${expected}`);
+  return given.length === wanted.length && timingSafeEqual(given, wanted);
+}
+
 export async function POST(request: Request) {
-  const secret = request.headers.get("authorization");
-  if (
-    !process.env.CRON_SECRET ||
-    secret !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  if (!authorized(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isMetaConfigured()) {
+    return Response.json({ skipped: "Instagram is not configured." });
   }
 
   try {

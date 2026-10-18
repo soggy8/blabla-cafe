@@ -19,7 +19,6 @@ export function LoginForm() {
           name="password"
           type="password"
           autoComplete="current-password"
-          minLength={8}
           required
         />
       </label>

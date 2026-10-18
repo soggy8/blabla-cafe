@@ -11,6 +11,7 @@ import {
   getCurrentOwner,
   logoutOwner,
 } from "@/lib/auth";
+import { clientIp } from "@/lib/client-ip";
 import { slugify } from "@/lib/slug";
 import { deleteImageUpload, saveImageUpload } from "@/lib/uploads";
 import { getDb } from "@/db/client";
@@ -18,7 +19,9 @@ import { menuCategories, menuItems } from "@/db/schema";
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8).max(200),
+  // Only checks the shape: the length rules apply when a password is set, and
+  // an existing owner must always be able to sign in.
+  password: z.string().min(1).max(200),
 });
 
 const passwordSchema = z
@@ -73,12 +76,11 @@ export async function loginAction(
   if (!parsed.success) return { error: "Проверете ги внесените податоци." };
 
   const requestHeaders = await headers();
-  const ip =
-    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  const ip = clientIp(requestHeaders);
   const result = await authenticateOwner(
     parsed.data.email,
     parsed.data.password,
-    `${ip}:${parsed.data.email.toLowerCase()}`,
+    ip,
   );
 
   if (!result.ok) {

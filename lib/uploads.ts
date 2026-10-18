@@ -19,16 +19,18 @@ export async function saveImageUpload(file: File): Promise<UploadResult> {
   }
 
   const input = Buffer.from(await file.arrayBuffer());
-  const metadata = await sharp(input).metadata();
-  if (!metadata.width || !metadata.height) {
+  let output: Buffer;
+  try {
+    const metadata = await sharp(input).metadata();
+    if (!metadata.width || !metadata.height) throw new Error("no dimensions");
+    output = await sharp(input)
+      .rotate()
+      .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
+  } catch {
     return { ok: false, status: 400, error: "Invalid image" };
   }
-
-  const output = await sharp(input)
-    .rotate()
-    .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 82 })
-    .toBuffer();
 
   const directory = uploadDirectory();
   await mkdir(directory, { recursive: true });

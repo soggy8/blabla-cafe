@@ -34,14 +34,15 @@ services:
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
       ADMIN_EMAIL: ${ADMIN_EMAIL:?set ADMIN_EMAIL in .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
-      CRON_SECRET: ${CRON_SECRET}
+      CRON_SECRET: ${CRON_SECRET:?set CRON_SECRET in .env}
+      RESET_ADMIN_PASSWORD: ${RESET_ADMIN_PASSWORD:-}
       META_GRAPH_VERSION: ${META_GRAPH_VERSION:-v24.0}
       INSTAGRAM_USER_ID: ${INSTAGRAM_USER_ID:-}
       INSTAGRAM_ACCESS_TOKEN: ${INSTAGRAM_ACCESS_TOKEN:-}
     volumes:
       - uploads:/app/storage/uploads
     ports:
-      - "${APP_PORT:-3000}:3000"
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-3000}:3000"
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
       interval: 20s
@@ -51,6 +52,25 @@ services:
       resources:
         limits:
           memory: 1G
+
+  scheduler:
+    image: curlimages/curl:8.11.1
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    entrypoint: ["sh", "/scheduler.sh"]
+    environment:
+      APP_URL: http://app:3000
+      CRON_SECRET: ${CRON_SECRET:?set CRON_SECRET in .env}
+      HEALTHCHECK_PING_URL: ${HEALTHCHECK_PING_URL:-}
+      SYNC_EVERY_SECONDS: ${SYNC_EVERY_SECONDS:-21600}
+    volumes:
+      - ./scripts/scheduler.sh:/scheduler.sh:ro,z
+    deploy:
+      resources:
+        limits:
+          memory: 64M
 
 volumes:
   postgres_data:

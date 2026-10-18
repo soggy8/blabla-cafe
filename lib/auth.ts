@@ -2,15 +2,19 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import { hash, verify } from "@node-rs/argon2";
-import { and, eq, gt, isNull, lt, ne, or } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lt, ne, or } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getDb, hasDatabase } from "@/db/client";
 import { loginAttempts, owners, sessions } from "@/db/schema";
 
 const SESSION_COOKIE = "blabla_owner_session";
 const SESSION_DAYS = 14;
-const MAX_ATTEMPTS = 5;
 const BLOCK_MINUTES = 15;
+// Failed logins are counted per client address and per account, so a forged
+// address cannot be rotated to dodge the limit. The account limit is higher so
+// a stranger cannot lock the owner out with a handful of guesses.
+const IP_MAX_ATTEMPTS = 5;
+const ACCOUNT_MAX_ATTEMPTS = 20;
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -19,7 +23,7 @@ function hashToken(token: string) {
 export async function authenticateOwner(
   email: string,
   password: string,
-  throttleKey: string,
+  clientAddress: string,
 ) {
   if (!hasDatabase()) {
     return { ok: false as const, reason: "database" as const };
@@ -27,41 +31,49 @@ export async function authenticateOwner(
 
   const db = getDb();
   const now = new Date();
-  const [attempt] = await db
+  const normalizedEmail = email.trim().toLowerCase();
+  const limits = [
+    { key: `ip:${clientAddress}`, max: IP_MAX_ATTEMPTS },
+    { key: `account:${normalizedEmail}`, max: ACCOUNT_MAX_ATTEMPTS },
+  ];
+
+  const attempts = await db
     .select()
     .from(loginAttempts)
-    .where(eq(loginAttempts.key, throttleKey))
-    .limit(1);
-
-  if (attempt?.blockedUntil && attempt.blockedUntil > now) {
+    .where(inArray(loginAttempts.key, limits.map((limit) => limit.key)));
+  if (attempts.some((row) => row.blockedUntil && row.blockedUntil > now)) {
     return { ok: false as const, reason: "blocked" as const };
   }
 
   const [owner] = await db
     .select()
     .from(owners)
-    .where(eq(owners.email, email.trim().toLowerCase()))
+    .where(eq(owners.email, normalizedEmail))
     .limit(1);
 
   const valid = owner ? await verify(owner.passwordHash, password) : false;
   if (!owner || !valid) {
-    const attempts = (attempt?.attempts ?? 0) + 1;
-    const blockedUntil =
-      attempts >= MAX_ATTEMPTS
-        ? new Date(Date.now() + BLOCK_MINUTES * 60 * 1000)
-        : null;
-
-    await db
-      .insert(loginAttempts)
-      .values({ key: throttleKey, attempts, blockedUntil, updatedAt: now })
-      .onConflictDoUpdate({
-        target: loginAttempts.key,
-        set: { attempts, blockedUntil, updatedAt: now },
-      });
+    for (const limit of limits) {
+      const count =
+        (attempts.find((row) => row.key === limit.key)?.attempts ?? 0) + 1;
+      const blockedUntil =
+        count >= limit.max
+          ? new Date(Date.now() + BLOCK_MINUTES * 60 * 1000)
+          : null;
+      await db
+        .insert(loginAttempts)
+        .values({ key: limit.key, attempts: count, blockedUntil, updatedAt: now })
+        .onConflictDoUpdate({
+          target: loginAttempts.key,
+          set: { attempts: count, blockedUntil, updatedAt: now },
+        });
+    }
     return { ok: false as const, reason: "credentials" as const };
   }
 
-  await db.delete(loginAttempts).where(eq(loginAttempts.key, throttleKey));
+  await db
+    .delete(loginAttempts)
+    .where(inArray(loginAttempts.key, limits.map((limit) => limit.key)));
   await deleteStaleAuthRows();
 
   const token = randomBytes(32).toString("base64url");
